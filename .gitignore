@@ -20,7 +20,7 @@ venv/
 env/
 .env
 /env
-Backend/env/
+/Backend/env/
 
 # Compiled Python files
 *.pyc
