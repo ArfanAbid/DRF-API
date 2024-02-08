@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework import generics
+from rest_framework import generics,mixins
 
 
 from .models import Blog
@@ -141,3 +141,35 @@ class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
             CreateAPIView DestroyAPIView RetrieveDestroyAPIView ListAPIView ...  ect'''
 
 
+
+    # Mixins with Generics 
+
+# Mixins are used with generics in Django REST Framework to provide additional functionality and behavior to generic views. They allow developers to reuse common functionality across multiple views without duplicating code.
+
+class ListCreate(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
+    queryset=Blog.objects.all()
+    serializer_class=BlogSerializer
+
+    def get(self,request,*args,**kwargs):
+        return self.list(request,*args,**kwargs)
+
+    def post(self,request,*args,**kwargs):
+        return self.create(request,*args,**kwargs)
+    
+
+class RetrieveUpdateDestroy(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
+    queryset=Blog.objects.all()
+    serializer_class=BlogSerializer
+    lookup_field='pk'
+
+    def get(self,request,*args,**kwargs):
+        return self.retrieve(request,*args,**kwargs)
+    
+    def put(self,request,*args,**kwargs):
+        return self.update(request,*args,**kwargs)
+    
+    def delete(self,request,*args,**kwargs):
+        return self.destroy(request,*args,**kwargs)
+    
+
+# U can also use each functionality indenpendently using seperate function like mixins.UpdateModelMixins ... ect
