@@ -1,5 +1,18 @@
 from rest_framework import serializers
 from .models import Blog
+from django.contrib.auth.models import User
+
+class UserSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields=('username','password')
+
+        def create(self,attrs): # for hashing passwords
+            user=User.objects.create(username=attrs['username'])
+            user.set_password(attrs['password'])
+            user.save()
+            return user
+
 
 class BlogSerializer(serializers.ModelSerializer):
     class Meta:

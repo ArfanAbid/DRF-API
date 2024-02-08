@@ -9,10 +9,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics,mixins
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 
 from .models import Blog
-from .serializers import BlogSerializer
+from .serializers import BlogSerializer,UserSerializers
+from django.contrib.auth.models import User
 
 # There are many ways to write views in DRF which are listed below :
 
@@ -63,6 +67,8 @@ def blog_detail(request ,id):
 
 
 class ListBlog(APIView):
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[IsAuthenticated]
     
     def get(self,request,*args,**kwargs):
         queryset=Blog.objects.all()
@@ -77,6 +83,8 @@ class ListBlog(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class DetailBlog(APIView):
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[IsAuthenticated]    
 
     def get(self, request,pk,*args, **kwargs):
         try:
@@ -112,6 +120,9 @@ class DetailBlog(APIView):
     # Generics Views
 
 class BlogListCreatAPI(generics.ListCreateAPIView):
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[IsAuthenticated]     
+    
     queryset=Blog.objects.all()
     serializer_class=BlogSerializer
         
@@ -125,6 +136,9 @@ class BlogListCreatAPI(generics.ListCreateAPIView):
     
         
 class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[IsAuthenticated] 
+
     queryset=Blog.objects.all()
     serializer_class=BlogSerializer
     lookup_field='pk'
@@ -147,6 +161,9 @@ class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 # Mixins are used with generics in Django REST Framework to provide additional functionality and behavior to generic views. They allow developers to reuse common functionality across multiple views without duplicating code.
 
 class ListCreate(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[IsAuthenticated] 
+
     queryset=Blog.objects.all()
     serializer_class=BlogSerializer
 
@@ -158,6 +175,9 @@ class ListCreate(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateMode
     
 
 class RetrieveUpdateDestroy(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[IsAuthenticated] 
+
     queryset=Blog.objects.all()
     serializer_class=BlogSerializer
     lookup_field='pk'
@@ -173,3 +193,17 @@ class RetrieveUpdateDestroy(generics.GenericAPIView,mixins.RetrieveModelMixin,mi
     
 
 # U can also use each functionality indenpendently using seperate function like mixins.UpdateModelMixins ... ect
+    
+
+# Token Authentication
+
+class RegisterUser(APIView): # whenever user is created then token will be generated manually by this method
+    def post(self, request):
+        serializer=UserSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user=User.objects.get(username=serializer.data['username'])
+            token_obj,_=Token.objects.get_or_create(user=user)
+
+            return Response({'data':serializer.data,'token':str(token_obj)},status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
