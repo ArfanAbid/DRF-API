@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework import generics
 
 
 from .models import Blog
@@ -107,3 +108,36 @@ class DetailBlog(APIView):
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)       
     
+
+    # Generics Views
+
+class BlogListCreatAPI(generics.ListCreateAPIView):
+    queryset=Blog.objects.all()
+    serializer_class=BlogSerializer
+        
+    # This is additional method if u wants so :
+    
+    # def perform_create(self, serializer):
+    #     title=self.get('title') or None
+    #     if title is None:
+    #         title="title is required or not Provided "
+    #         serializer.save(title=title)    
+    
+        
+class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Blog.objects.all()
+    serializer_class=BlogSerializer
+    lookup_field='pk'
+
+    # This is additional method if u wants so  You can add custom queryset logic here if needed.
+
+    def perform_destroy(self, instance):
+    # Your custom logic for deleting the blog entry
+        instance=self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+            
+'''            There are many other methods in generics u can use according to your use :
+            CreateAPIView DestroyAPIView RetrieveDestroyAPIView ListAPIView ...  ect'''
+
+
