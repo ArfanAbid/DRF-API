@@ -11,9 +11,10 @@ from rest_framework.views import APIView
 from rest_framework import generics,mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import filters
 
 
 from .models import Blog
@@ -25,9 +26,10 @@ from django.contrib.auth.models import User
     # Function based views
 
 @api_view(['GET','POST'])
+
 def blog_list(request, *args, **kwargs):
     # get all the blog ,serialize them ,return them
-    
+
     if request.method== 'GET':
         queryset=Blog.objects.all()
         serializer=BlogSerializer(queryset, many=True)
@@ -70,8 +72,9 @@ def blog_detail(request ,id):
 
 class ListBlog(APIView):
     # authentication_classes=[TokenAuthentication]
-    authentication_classes=[JWTAuthentication]
-    permission_classes=[IsAuthenticated]
+    # authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticatedOrReadOnly]
+    
     
     def get(self,request,*args,**kwargs):
         queryset=Blog.objects.all()
@@ -125,9 +128,19 @@ class DetailBlog(APIView):
 
 class BlogListCreatAPI(generics.ListCreateAPIView):
     # authentication_classes=[TokenAuthentication]
-    authentication_classes=[JWTAuthentication]
-    permission_classes=[IsAuthenticated]     
+    # authentication_classes=[JWTAuthentication]
+    # permission_classes=[IsAuthenticated]    
+        
+
+            # searching and Ordering 
+    # Note : This works in generics only 
+    filter_backends = [filters.SearchFilter,filters.OrderingFilter]
+    search_fields = ['^title','id']
+    ordering_fields = ['title']
     
+
+
+
     queryset=Blog.objects.all()
     serializer_class=BlogSerializer
         

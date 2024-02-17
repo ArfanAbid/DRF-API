@@ -44,6 +44,7 @@ EXTERNAL_APPS=[
     'Blog',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'django_filters',
 ]
 INSTALLED_APPS += EXTERNAL_APPS
 
