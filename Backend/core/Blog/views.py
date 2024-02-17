@@ -12,6 +12,8 @@ from rest_framework import generics,mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from .models import Blog
@@ -67,7 +69,8 @@ def blog_detail(request ,id):
 
 
 class ListBlog(APIView):
-    authentication_classes=[TokenAuthentication]
+    # authentication_classes=[TokenAuthentication]
+    authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated]
     
     def get(self,request,*args,**kwargs):
@@ -83,7 +86,8 @@ class ListBlog(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class DetailBlog(APIView):
-    authentication_classes=[TokenAuthentication]
+    # authentication_classes=[TokenAuthentication]
+    authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated]    
 
     def get(self, request,pk,*args, **kwargs):
@@ -120,7 +124,8 @@ class DetailBlog(APIView):
     # Generics Views
 
 class BlogListCreatAPI(generics.ListCreateAPIView):
-    authentication_classes=[TokenAuthentication]
+    # authentication_classes=[TokenAuthentication]
+    authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated]     
     
     queryset=Blog.objects.all()
@@ -136,7 +141,8 @@ class BlogListCreatAPI(generics.ListCreateAPIView):
     
         
 class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    authentication_classes=[TokenAuthentication]
+    # authentication_classes=[TokenAuthentication]
+    authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated] 
 
     queryset=Blog.objects.all()
@@ -161,7 +167,8 @@ class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 # Mixins are used with generics in Django REST Framework to provide additional functionality and behavior to generic views. They allow developers to reuse common functionality across multiple views without duplicating code.
 
 class ListCreate(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
-    authentication_classes=[TokenAuthentication]
+    # authentication_classes=[TokenAuthentication]
+    authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated] 
 
     queryset=Blog.objects.all()
@@ -175,7 +182,8 @@ class ListCreate(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateMode
     
 
 class RetrieveUpdateDestroy(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
-    authentication_classes=[TokenAuthentication]
+    # authentication_classes=[TokenAuthentication]
+    authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated] 
 
     queryset=Blog.objects.all()
@@ -206,5 +214,20 @@ class RegisterUser(APIView): # whenever user is created then token will be gener
             token_obj,_=Token.objects.get_or_create(user=user)
 
             Response_data={'data':serializer.data,'token':str(token_obj)}
+            return Response(Response_data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+# JWT Authentication
+
+class RegisterJWTUser(APIView): # whenever user is created then JWT token will be generated manually by this method
+    def post(self, request):
+        serializer=UserSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user=User.objects.get(username=serializer.data['username'])
+            refresh = RefreshToken.for_user(user)
+
+            Response_data={'data':serializer.data,'token':{'refresh': str(refresh),'access': str(refresh.access_token),}}
+
             return Response(Response_data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

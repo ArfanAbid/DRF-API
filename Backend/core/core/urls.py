@@ -17,10 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from rest_framework.authtoken import views
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('Blog/',include('Blog.urls')),
-    path('api-token-auth/', views.obtain_auth_token)
+    # path('api-token-auth/', views.obtain_auth_token), # Token authentication
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), # JWT authentication
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # JWT authentication
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'), # JWT authentication
 ]
