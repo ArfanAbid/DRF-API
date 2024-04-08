@@ -11,5 +11,4 @@ urlpatterns = [
     path('createList/', views.ListCreate.as_view()), #  Mixins-Generics Class based
     path('reteriveUpdateDestroy/<int:pk>/', views.RetrieveUpdateDestroy.as_view()), #  Mixins-Generics Class based
     path('register/', views.RegisterUser.as_view()), # Token Authentication
-    path('registerJWT/', views.RegisterJWTUser.as_view()), # JWT Token Authentication
 ]

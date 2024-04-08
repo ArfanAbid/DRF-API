@@ -26,6 +26,7 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('Blog/',include('Blog.urls')),
+    path('User/',include('Users.urls')),
     # path('api-token-auth/', views.obtain_auth_token), # Token authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), # JWT authentication
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # JWT authentication

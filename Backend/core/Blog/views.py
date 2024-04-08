@@ -13,7 +13,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters
 
 
@@ -230,17 +229,17 @@ class RegisterUser(APIView): # whenever user is created then token will be gener
             return Response(Response_data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-# JWT Authentication
+# JWT Authentication done in User App
 
-class RegisterJWTUser(APIView): # whenever user is created then JWT token will be generated manually by this method
-    def post(self, request):
-        serializer=UserSerializers(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            user=User.objects.get(username=serializer.data['username'])
-            refresh = RefreshToken.for_user(user)
+# class RegisterJWTUser(APIView): # whenever user is created then JWT token will be generated manually by this method
+#     def post(self, request):
+#         serializer=UserSerializers(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             user=User.objects.get(username=serializer.data['username'])
+#             refresh = RefreshToken.for_user(user)
 
-            Response_data={'data':serializer.data,'token':{'refresh': str(refresh),'access': str(refresh.access_token),}}
+#             Response_data={'data':serializer.data,'token':{'refresh': str(refresh),'access': str(refresh.access_token),}}
 
-            return Response(Response_data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+#             return Response(Response_data,status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
